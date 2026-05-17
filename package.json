@@ -1,0 +1,12 @@
+{
+  "name": "gesstia",
+  "version": "1.0.0",
+  "description": "Sistema de gestión de Seguridad y Salud en el Trabajo conforme a normativa chilena vigente (DS 44, DS 594, Ley 16.744).",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
