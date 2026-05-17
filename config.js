@@ -1,104 +1,31 @@
 /**
  * GeSSTia - Configuración Principal
  * Gestión Integral de Seguridad y Salud en el Trabajo
- * Chile 2026 - Normativa DS 44, DS 594, Ley 16.744
+ * Chile 2026 - Stack: Supabase + GitHub Pages
  */
 
 // ============================================
-// CONFIGURACIÓN DE FIREBASE (Reemplazar con tus credenciales)
+// CONFIGURACIÓN DE SUPABASE (Producción)
 // ============================================
-const firebaseConfig = {
-    apiKey: "AIzaSyC_dEMO_KEY_GESSTIA_1234567890",
-    authDomain: "gesstia-demo.firebaseapp.com",
-    projectId: "gesstia-demo",
-    storageBucket: "gesstia-demo.appspot.com",
-    messagingSenderId: "123456789012",
-    appId: "1:123456789012:web:abcdef1234567890"
+const SUPABASE_CONFIG = {
+    url: "https://zpmcivfnwalqlmchajvn.supabase.co",
+    anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpwbWNpdmZud2FscWxtY2hhanZuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwNTA3MjEsImV4cCI6MjA5NDYyNjcyMX0.jw-e6rthKiE-mhwRQMr514pcMoCeTLHIfOQvqUnikqY"
 };
 
-// Inicializar Firebase (si no está inicializado)
-if (typeof firebase !== 'undefined' && !firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-}
+// Importar Supabase client (se carga desde CDN)
+let supabase = null;
 
-// Referencias globales
-const auth = firebase ? firebase.auth() : null;
-const db = firebase ? firebase.firestore() : null;
-const storage = firebase ? firebase.storage() : null;
+document.addEventListener('DOMContentLoaded', async () => {
+    if (typeof supabaseClient !== 'undefined') {
+        supabase = supabaseClient.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+        window.supabase = supabase;
+        console.log('✅ Supabase inicializado');
+    } else {
+        console.warn('⚠️ Supabase Client no cargado. Cargando desde CDN...');
+    }
+});
 
-// ============================================
-// CONFIGURACIÓN DE LA APLICACIÓN
-// ============================================
-const APP_CONFIG = {
-    name: 'GeSSTia',
-    version: '1.0.0',
-    locale: 'es-CL',
-    currency: 'CLP',
-   DateFormat: 'DD/MM/YYYY',
-    
-    // Roles del sistema
-    ROLES: {
-        SUPER_ADMIN: 'super_admin',
-        ADMIN: 'admin',
-        SUPERVISOR: 'supervisor',
-        COLABORADOR: 'colaborador'
-    },
-    
-    // Permisos por rol
-    PERMISOS: {
-        super_admin: ['*'], // Todo
-        admin: [
-            'empresa.ver', 'empresa.editar',
-            'trabajadores.ver', 'trabajadores.crear', 'trabajadores.editar', 'trabajadores.eliminar',
-            'iper.ver', 'iper.crear', 'iper.editar',
-            'capacitaciones.ver', 'capacitaciones.crear', 'capacitaciones.editar',
-            'contratistas.ver', 'contratistas.crear',
-            'firmas.ver', 'firmas.crear',
-            'reportes.ver'
-        ],
-        supervisor: [
-            'empresa.ver',
-            'trabajadores.ver',
-            'iper.ver',
-            'capacitaciones.ver', 'capacitaciones.asignar',
-            'reportes.ver'
-        ],
-        colaborador: [
-            'perfil.ver', 'perfil.editar',
-            'capacitaciones.mis-capacitaciones',
-            'firmas.firmar'
-        ]
-    },
-    
-    // Estados de cumplimiento normativo
-    ESTADOS_CUMPLIMIENTO: [
-        { id: 'completo', label: 'Cumple', color: '#2ecc71' },
-        { id: 'parcial', label: 'Parcial', color: '#f39c12' },
-        { id: 'pendiente', label: 'Pendiente', color: '#e74c3c' },
-        { id: 'no-aplica', label: 'No Aplica', color: '#95a5a6' }
-    ],
-    
-    // Niveles de riesgo IPER
-    NIVELES_RIESGO: [
-        { id: 'bajo', label: 'Bajo', valor: 1, color: '#2ecc71' },
-        { id: 'medio', label: 'Medio', valor: 2, color: '#f39c12' },
-        { id: 'alto', label: 'Alto', valor: 3, color: '#e67e22' },
-        { id: 'critico', label: 'Crítico', valor: 4, color: '#e74c3c' }
-    ],
-    
-    // Tipos de documentos
-    TIPOS_DOCUMENTO: [
-        { id: 'procedimiento', label: 'Procedimiento' },
-        { id: 'protocolo', label: 'Protocolo' },
-        { id: 'capacitacion', label: 'Capacitación' },
-        { id: 'informe', label: 'Informe' },
-        { id: 'checklist', label: 'Checklist' },
-        { id: 'matriz-iper', label: 'Matriz IPER' },
-        { id: 'evaluacion', label: 'Evaluación' }
-    ]
-};
 
-// ============================================
 // FUNCIONES UTILITARIAS
 // ============================================
 
