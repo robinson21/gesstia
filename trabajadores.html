@@ -5,8 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GeSSTia - Trabajadores</title>
     <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .main-wrapper { margin-left: 0 !important; }
+        @media (min-width: 769px) {
+            .main-wrapper { margin-left: 260px !important; }
+        }
+    </style>
 </head>
 <body class="dashboard-layout">
+
+    <!-- Sidebar -->
     <aside class="sidebar">
         <div class="sidebar-header">
             <h2>GeSSTia</h2>
@@ -15,7 +23,7 @@
         <nav>
             <ul class="main-nav">
                 <li><a href="dashboard.html" class="nav-link" data-section="dashboard"><span class="icon">🏠</span> Dashboard</a></li>
-                <li><a href="trabajadores.html" class="nav-link" data-section="trabajadores"><span class="icon">👷</span> Trabajadores</a></li>
+                <li><a href="trabajadores.html" class="nav-link active" data-section="trabajadores"><span class="icon">👷</span> Trabajadores</a></li>
                 <li><a href="iper.html" class="nav-link" data-section="iper"><span class="icon">⚠️</span> IPER / IRL</a></li>
                 <li><a href="capacitaciones.html" class="nav-link" data-section="capacitaciones"><span class="icon">🎓</span> Capacitaciones</a></li>
                 <li><a href="contratistas.html" class="nav-link" data-section="contratistas"><span class="icon">🤝</span> Contratistas</a></li>
@@ -26,10 +34,16 @@
         </nav>
     </aside>
 
+    <!-- Notificación Toast -->
+    <div id="toast" class="toast" style="display:none;">
+        <span id="toast-message"></span>
+    </div>
+
+    <!-- Main Content -->
     <div class="main-wrapper">
         <header class="topbar">
             <div class="page-title">
-                <h1>Trabajadores</h1>
+                <h1>👷 Trabajadores</h1>
             </div>
             <div class="user-menu">
                 <span class="user-name" id="user-name">Usuario</span>
@@ -37,27 +51,621 @@
                 <button class="btn-logout" onclick="doLogout()" title="Cerrar sesión">🚪</button>
             </div>
         </header>
+
         <main class="content-area">
-            <div class="section-card" style="text-align:center; padding:60px 20px;">
-                <div style="font-size:4rem; margin-bottom:20px;">🚧</div>
-                <h2 style="color:var(--color-text); margin-bottom:12px;">Trabajadores</h2>
-                <p style="color:var(--color-text-dim); max-width:500px; margin:0 auto;">
-                    Este módulo estará disponible próximamente.<BR/>
-                    Estamos desarrollando todas las funcionalidades paso a paso.
-                </p>
-                <a href="dashboard.html" class="btn btn-primary" style="width:auto; margin-top:24px; display:inline-flex;">
-                    ← Volver al Dashboard
-                </a>
+            
+            <!-- Toolbar -->
+            <div class="toolbar">
+                <div class="toolbar-left">
+                    <div class="search-box">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="search-input" placeholder="Buscar por nombre o RUT..." oninput="filterWorkers()">
+                    </div>
+                    <select class="filter-select" id="filter-cargo" onchange="filterWorkers()">
+                        <option value="">Todos los cargos</option>
+                    </select>
+                    <select class="filter-select" id="filter-centro" onchange="filterWorkers()">
+                        <option value="">Todos los centros</option>
+                    </select>
+                </div>
+                <div class="toolbar-right">
+                    <button class="btn-primary-sm" onclick="openModal()">➕ Nuevo Trabajador</button>
+                </div>
             </div>
+
+            <!-- Stats Summary -->
+            <div class="stats-grid" style="margin-bottom: 24px;">
+                <div class="stat-card" style="cursor: default;">
+                    <div class="stat-icon blue">👷</div>
+                    <div>
+                        <div class="stat-number" id="count-activos">0</div>
+                        <div class="stat-label">Activos</div>
+                    </div>
+                </div>
+                <div class="stat-card" style="cursor: default;">
+                    <div class="stat-icon green">✅</div>
+                    <div>
+                        <div class="stat-number" id="count-fonasa">0</div>
+                        <div class="stat-label">FONASA</div>
+                    </div>
+                </div>
+                <div class="stat-card" style="cursor: default;">
+                    <div class="stat-icon orange">🏥</div>
+                    <div>
+                        <div class="stat-number" id="count-isapre">0</div>
+                        <div class="stat-label">ISAPRE</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla de Trabajadores -->
+            <div class="section-card" style="padding: 0; overflow: hidden;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>RUT</th>
+                            <th>Nombre</th>
+                            <th>Cargo</th>
+                            <th>Centro</th>
+                            <th>Previsión</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="workers-table-body">
+                        <!-- Se llena dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+
         </main>
+    </div>
+
+    <!-- Modal: Crear/Editar Trabajador -->
+    <div class="modal-overlay" id="modal-form">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2 id="modal-title">Nuevo Trabajador</h2>
+                <button class="btn-close" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="worker-form">
+                    <input type="hidden" id="worker-id">
+                    
+                    <div class="section-title">👤 Información Personal</div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="w-rut">RUT *</label>
+                            <input type="text" id="w-rut" placeholder="12.345.678-9" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="w-nombres">Nombres *</label>
+                            <input type="text" id="w-nombres" placeholder="Juan Carlos" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="w-apellidos">Apellidos *</label>
+                            <input type="text" id="w-apellidos" placeholder="Martínez López" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="w-email">Email</label>
+                            <input type="email" id="w-email" placeholder="juan@mail.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="w-telefono">Teléfono</label>
+                            <input type="tel" id="w-telefono" placeholder="+56 9 1234 5678">
+                        </div>
+                        <div class="form-group">
+                            <label for="w-fnacimiento">Fecha Nacimiento</label>
+                            <input type="date" id="w-fnacimiento">
+                        </div>
+                    </div>
+
+                    <div class="section-title" style="margin-top: 24px;">💼 Información Laboral</div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="w-cargo">Cargo *</label>
+                            <select id="w-cargo" required>
+                                <option value="">Seleccionar...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="w-centro">Centro de Trabajo *</label>
+                            <select id="w-centro" required>
+                                <option value="">Seleccionar...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="w-fingreso">Fecha Ingreso *</label>
+                            <input type="date" id="w-fingreso" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="w-prevision">Previsión</label>
+                            <select id="w-prevision">
+                                <option value="fonasa">FONASA</option>
+                                <option value="isapre">ISAPRE</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="irl-preview" style="background: rgba(52,152,219,0.05); border: 1px solid var(--color-border); border-left: 4px solid var(--color-highlight); border-radius: 8px; padding: 16px; margin: 16px 0; display: none;">
+                        <h4 style="color: var(--color-highlight); margin-bottom: 8px;">⚠️ Riesgos Inherentes al Cargo</h4>
+                        <div id="irl-riesgos"></div>
+                    </div>
+
+                    <div class="section-title" style="margin-top: 24px;">⚕️ Información Médica</div>
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label for="w-alergias">Alergias / Condiciones Médicas</label>
+                            <textarea id="w-alergias" rows="3" placeholder="Ninguna conocida..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="section-title" style="margin-top: 24px;">🚨 Contacto de Emergencia</div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="w-cenombre">Nombre</label>
+                            <input type="text" id="w-cenombre" placeholder="María López">
+                        </div>
+                        <div class="form-group">
+                            <label for="w-cetelefono">Teléfono</label>
+                            <input type="tel" id="w-cetelefono" placeholder="+56 9 8765 4321">
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="w-cerelacion">Relación</label>
+                            <input type="text" id="w-cerelacion" placeholder="Esposa, Padre, Hermano...">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+                <button class="btn-primary-sm" onclick="saveWorker()">💾 Guardar Trabajador</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Ver Detalle -->
+    <div class="modal-overlay" id="modal-view">
+        <div class="modal-container" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2>👤 Detalle del Trabajador</h2>
+                <button class="btn-close" onclick="closeViewModal()">×</button>
+            </div>
+            <div class="modal-body" id="view-content">
+                <!-- Se llena dinámicamente -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary-sm" onclick="closeViewModal()">Cerrar</button>
+            </div>
+        </div>
     </div>
 
     <script src="js/data.js"></script>
     <script src="js/app.js"></script>
     <script>
-        checkAuth();
-        loadUserData();
-        setActiveNav();
+        let currentWorkers = [];
+        let editingId = null;
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+            loadUserData();
+            setActiveNav();
+            initFilters();
+            renderWorkers();
+            updateStats();
+        });
+
+        // Inicializar filtros
+        function initFilters() {
+            const cargoSelect = document.getElementById('filter-cargo');
+            const modalCargo = document.getElementById('w-cargo');
+            DATOS_DEMO.cargos.forEach(c => {
+                if (cargoSelect) {
+                    const opt = document.createElement('option');
+                    opt.value = c.id;
+                    opt.textContent = c.nombre;
+                    cargoSelect.appendChild(opt);
+                }
+                if (modalCargo) {
+                    const opt = document.createElement('option');
+                    opt.value = c.id;
+                    opt.textContent = c.nombre;
+                    modalCargo.appendChild(opt);
+                }
+            });
+
+            const centroSelect = document.getElementById('filter-centro');
+            const modalCentro = document.getElementById('w-centro');
+            DATOS_DEMO.centros.forEach(c => {
+                if (centroSelect) {
+                    const opt = document.createElement('option');
+                    opt.value = c.id;
+                    opt.textContent = c.nombre;
+                    centroSelect.appendChild(opt);
+                }
+                if (modalCentro) {
+                    const opt = document.createElement('option');
+                    opt.value = c.id;
+                    opt.textContent = c.nombre;
+                    modalCentro.appendChild(opt);
+                }
+            });
+
+            const hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('w-fingreso').value = hoy;
+        }
+
+        // Obtener trabajadores
+        function getWorkers() {
+            const stored = localStorage.getItem('gesstia_trabajadores');
+            if (stored) return JSON.parse(stored);
+            return DATOS_DEMO.trabajadores || [];
+        }
+
+        // Guardar trabajadores
+        function saveWorkersList(workers) {
+            localStorage.setItem('gesstia_trabajadores', JSON.stringify(workers));
+        }
+
+        // Renderizar tabla
+        function renderWorkers() {
+            currentWorkers = getWorkers();
+            const tbody = document.getElementById('workers-table-body');
+            const search = document.getElementById('search-input')?.value.toLowerCase() || '';
+            const cargoFilter = document.getElementById('filter-cargo')?.value || '';
+            const centroFilter = document.getElementById('filter-centro')?.value || '';
+
+            let filtered = currentWorkers.filter(w => w.activo !== false);
+
+            if (search) {
+                filtered = filtered.filter(w => 
+                    (w.nombres + ' ' + w.apellidos).toLowerCase().includes(search) ||
+                    w.rut.toLowerCase().includes(search)
+                );
+            }
+            if (cargoFilter) {
+                filtered = filtered.filter(w => w.cargoId === cargoFilter);
+            }
+            if (centroFilter) {
+                filtered = filtered.filter(w => w.centroId === centroFilter);
+            }
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 40px; color: var(--color-text-dim);">No se encontraron trabajadores</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(w => {
+                const cargo = DATOS_DEMO.cargos.find(c => c.id === w.cargoId);
+                const centro = DATOS_DEMO.centros.find(c => c.id === w.centroId);
+                const nivelRiesgo = cargo?.nivelRiesgo || 'bajo';
+                const badgeClass = {
+                    'critico': 'badge-critico',
+                    'alto': 'badge-alto',
+                    'medio': 'badge-medio',
+                    'bajo': 'badge-bajo'
+                }[nivelRiesgo] || 'badge-bajo';
+
+                return `
+                    <tr onclick="viewWorker('${w.id}')" title="Ver detalle" style="cursor: pointer;">
+                        <td>${w.rut}</td>
+                        <td><strong>${w.nombres} ${w.apellidos}</strong></td>
+                        <td>${cargo?.nombre || '-'}</td>
+                        <td>${centro?.nombre || '-'}</td>
+                        <td><span class="badge ${w.prevision === 'fonasa' ? 'badge-success' : 'badge-warning'}">${w.prevision.toUpperCase()}</span></td>
+                        <td><span class="badge ${badgeClass}">${nivelRiesgo.toUpperCase()}</span></td>
+                        <td onclick="event.stopPropagation()">
+                            <div class="action-btns">
+                                <button class="btn-icon" onclick="viewWorker('${w.id}')" title="Ver">👁</button>
+                                <button class="btn-icon" onclick="editWorker('${w.id}')" title="Editar">✏️</button>
+                                <button class="btn-icon delete" onclick="deleteWorker('${w.id}')" title="Eliminar">🗑</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Filtrar trabajadores
+        function filterWorkers() {
+            renderWorkers();
+        }
+
+        // Actualizar estadísticas
+        function updateStats() {
+            const workers = getWorkers();
+            const activos = workers.filter(w => w.activo !== false).length;
+            const fonasa = workers.filter(w => w.prevision === 'fonasa' && w.activo !== false).length;
+            const isapre = workers.filter(w => w.prevision === 'isapre' && w.activo !== false).length;
+
+            const el1 = document.getElementById('count-activos');
+            const el2 = document.getElementById('count-fonasa');
+            const el3 = document.getElementById('count-isapre');
+            if (el1) el1.textContent = activos;
+            if (el2) el2.textContent = fonasa;
+            if (el3) el3.textContent = isapre;
+        }
+
+        // Abrir modal (crear nuevo)
+        function openModal() {
+            editingId = null;
+            document.getElementById('modal-title').textContent = 'Nuevo Trabajador';
+            document.getElementById('worker-id').value = '';
+            document.getElementById('worker-form').reset();
+            
+            const hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('w-fingreso').value = hoy;
+
+            document.getElementById('modal-form').classList.add('active');
+            document.getElementById('irl-preview').style.display = 'none';
+        }
+
+        // Cerrar modal
+        function closeModal() {
+            document.getElementById('modal-form').classList.remove('active');
+            document.getElementById('irl-preview').style.display = 'none';
+        }
+
+        // Guardar trabajador
+        function saveWorker() {
+            const rut = document.getElementById('w-rut').value.trim();
+            if (!rut) { showToast('RUT requerido', 'error'); return; }
+            
+            const nombres = document.getElementById('w-nombres').value.trim();
+            const apellidos = document.getElementById('w-apellidos').value.trim();
+            const email = document.getElementById('w-email').value.trim();
+            const telefono = document.getElementById('w-telefono').value.trim();
+            const dNac = document.getElementById('w-fnacimiento').value;
+            const cargoId = document.getElementById('w-cargo').value;
+            const centroId = document.getElementById('w-centro').value;
+            const fIngreso = document.getElementById('w-fingreso').value;
+            const prevision = document.getElementById('w-prevision').value;
+            const alergias = document.getElementById('w-alergias').value.trim() || 'Ninguna conocida';
+
+            const ceNombre = document.getElementById('w-cenombre').value.trim();
+            const ceTelefono = document.getElementById('w-cetelefono').value.trim();
+            const ceRelacion = document.getElementById('w-cerelacion').value.trim();
+
+            if (!nombres || !apellidos || !cargoId || !centroId || !fIngreso) {
+                showToast('Complete los campos obligatorios', 'error');
+                return;
+            }
+
+            let workers = getWorkers();
+
+            if (editingId) {
+                const idx = workers.findIndex(w => w.id === editingId);
+                if (idx >= 0) {
+                    workers[idx] = {
+                        ...workers[idx],
+                        rut, nombres, apellidos, email, telefono, 
+                        fechaNacimiento: dNac,
+                        cargoId, centroId, fechaIngreso: fIngreso, prevision, alergias,
+                        contactoEmergencia: { nombre: ceNombre, telefono: ceTelefono, relacion: ceRelacion }
+                    };
+                }
+                showToast('Trabajador actualizado correctamente');
+            } else {
+                const newId = 't-' + String(workers.length + 1).padStart(3, '0');
+                workers.push({
+                    id: newId,
+                    rut, nombres, apellidos, email, telefono,
+                    fechaNacimiento: dNac,
+                    cargoId, centroId, empresaId: 'emp-001',
+                    fechaIngreso: fIngreso, prevision, alergias,
+                    contactoEmergencia: { nombre: ceNombre, telefono: ceTelefono, relacion: ceRelacion },
+                    activo: true
+                });
+                showToast('Trabajador creado correctamente');
+            }
+
+            saveWorkersList(workers);
+            closeModal();
+            renderWorkers();
+            updateStats();
+        }
+
+        // Editar trabajador
+        function editWorker(id) {
+            const workers = getWorkers();
+            const w = workers.find(x => x.id === id);
+            if (!w) return;
+
+            editingId = id;
+            document.getElementById('modal-title').textContent = 'Editar Trabajador';
+            document.getElementById('worker-id').value = id;
+            
+            document.getElementById('w-rut').value = w.rut;
+            document.getElementById('w-nombres').value = w.nombres;
+            document.getElementById('w-apellidos').value = w.apellidos;
+            document.getElementById('w-email').value = w.email || '';
+            document.getElementById('w-telefono').value = w.telefono || '';
+            document.getElementById('w-fnacimiento').value = w.fechaNacimiento || '';
+            document.getElementById('w-cargo').value = w.cargoId;
+            document.getElementById('w-centro').value = w.centroId;
+            document.getElementById('w-fingreso').value = w.fechaIngreso;
+            document.getElementById('w-prevision').value = w.prevision;
+            document.getElementById('w-alergias').value = w.alergias;
+
+            const ce = w.contactoEmergencia || {};
+            document.getElementById('w-cenombre').value = ce.nombre || '';
+            document.getElementById('w-cetelefono').value = ce.telefono || '';
+            document.getElementById('w-cerelacion').value = ce.relacion || '';
+
+            // Mostrar preview de IRL
+            const cargo = DATOS_DEMO.cargos.find(c => c.id === w.cargoId);
+            if (cargo) {
+                const preview = document.getElementById('irl-preview');
+                const container = document.getElementById('irl-riesgos');
+                preview.style.display = 'block';
+                
+                const nivelBadge = {
+                    'critico': '<span class="badge badge-critico">CRÍTICO</span>',
+                    'alto': '<span class="badge badge-alto">ALTO</span>',
+                    'medio': '<span class="badge badge-medio">MEDIO</span>',
+                    'bajo': '<span class="badge badge-bajo">BAJO</span>'
+                }[cargo.nivelRiesgo] || '<span class="badge badge-bajo">BAJO</span>';
+                
+                container.innerHTML = `
+                    <p style="margin-bottom: 12px;">Nivel de riesgo del cargo: ${nivelBadge}</p>
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                        ${cargo.riesgos.map(r => `<li style="padding: 4px 0; color: var(--color-text-dim);">• ${r}</li>`).join('')}
+                    </ul>
+                `;
+            }
+
+            document.getElementById('modal-form').classList.add('active');
+        }
+
+        // Ver detalle
+        function viewWorker(id) {
+            const workers = getWorkers();
+            const w = workers.find(x => x.id === id);
+            if (!w) return;
+
+            const cargo = DATOS_DEMO.cargos.find(c => c.id === w.cargoId);
+            const centro = DATOS_DEMO.centros.find(c => c.id === w.centroId);
+            const ce = w.contactoEmergencia || {};
+
+            document.getElementById('view-content').innerHTML = `
+                
+                <div class="detail-row">
+                    <div class="detail-label">RUT</div>
+                    <div class="detail-value">${w.rut}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Nombre Completo</div>
+                    <div class="detail-value"><strong>${w.nombres} ${w.apellidos}</strong></div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Email</div>
+                    <div class="detail-value">${w.email || '-'}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Teléfono</div>
+                    <div class="detail-value">${w.telefono || '-'}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Fecha Nacimiento</div>
+                    <div class="detail-value">${w.fechaNacimiento || '-'}</div>
+                </div>
+                
+                <div class="detail-row" style="margin-top: 16px; border-top: 2px solid var(--color-border); padding-top: 16px;">
+                    <div class="detail-label">Cargo</div>
+                    <div class="detail-value">${cargo?.nombre || '-'}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Centro de Trabajo</div>
+                    <div class="detail-value">${centro?.nombre || '-'}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Fecha Ingreso</div>
+                    <div class="detail-value">${w.fechaIngreso}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Previsión</div>
+                    <div class="detail-value"><span class="badge ${w.prevision === 'fonasa' ? 'badge-success' : 'badge-warning'}">${w.prevision.toUpperCase()}</span></div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Alergias</div>
+                    <div class="detail-value">${w.alergias}</div>
+                </div>
+
+                <div class="detail-row" style="margin-top: 16px; border-top: 2px solid var(--color-border); padding-top: 16px;">
+                    <div class="detail-label">Contacto Emergencia</div>
+                    <div class="detail-value">
+                        <strong>${ce.nombre || '-'}</strong><br>
+                        <span style="color: var(--color-text-dim); font-size: 0.9rem;">${ce.telefono || '-'} ${ce.relacion ? '(' + ce.relacion + ')' : ''}</span>
+                    </div>
+                </div>
+
+                ${cargo ? `
+                    <div class="detail-row" style="margin-top: 16px; border-top: 2px solid var(--color-border); padding-top: 16px;">
+                        <div class="detail-label">IRL Asociado</div>
+                        <div class="detail-value">
+                            <span class="badge ${cargo.nivelRiesgo === 'critico' ? 'badge-critico' : cargo.nivelRiesgo === 'alto' ? 'badge-alto' : 'badge-bajo'}">${cargo.nivelRiesgo.toUpperCase()}</span>
+                            <br><br>
+                            <strong>Riesgos:</strong><br>
+                            ${cargo.riesgos.map(r => `<span style="color: var(--color-text-dim); display: block; padding: 2px 0;">• ${r}</span>`).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+
+            `;
+            document.getElementById('modal-view').classList.add('active');
+        }
+
+        // Cerrar modal de vista
+        function closeViewModal() {
+            document.getElementById('modal-view').classList.remove('active');
+        }
+
+        // Eliminar trabajador
+        function deleteWorker(id) {
+            if (!confirm('¿Estás seguro de que deseas eliminar este trabajador?')) return;
+
+            let workers = getWorkers();
+            workers = workers.filter(w => w.id !== id);
+            saveWorkersList(workers);
+
+            showToast('Trabajador eliminado correctamente');
+            renderWorkers();
+            updateStats();
+        }
+
+        // Toast notification
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const msg = document.getElementById('toast-message');
+            msg.textContent = message;
+            toast.className = 'toast show' + (type === 'error' ? ' error' : '');
+            toast.style.display = 'flex';
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => { toast.style.display = 'none'; }, 300);
+            }, 3000);
+        }
+
+        // Cerrar modal al hacer click fuera
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal-overlay')) {
+                e.target.classList.remove('active');
+            }
+        });
+
+        // Mostrar preview IRL al cambiar cargo
+        document.addEventListener('change', function(e) {
+            if (e.target.id === 'w-cargo') {
+                const cargoId = e.target.value;
+                if (!cargoId) {
+                    document.getElementById('irl-preview').style.display = 'none';
+                    return;
+                }
+
+                const cargo = DATOS_DEMO.cargos.find(c => c.id === cargoId);
+                if (cargo) {
+                    const preview = document.getElementById('irl-preview');
+                    const container = document.getElementById('irl-riesgos');
+                    preview.style.display = 'block';
+                    
+                    const nivelBadge = {
+                        'critico': '<span class="badge badge-critico">CRÍTICO</span>',
+                        'alto': '<span class="badge badge-alto">ALTO</span>',
+                        'medio': '<span class="badge badge-medio">MEDIO</span>',
+                        'bajo': '<span class="badge badge-bajo">BAJO</span>'
+                    }[cargo.nivelRiesgo] || '<span class="badge badge-bajo">BAJO</span>';
+                    
+                    container.innerHTML = `
+                        <p style="margin-bottom: 12px;">Nivel de riesgo del cargo: ${nivelBadge}</p>
+                        <ul style="list-style: none; padding: 0; margin: 0;">
+                            ${cargo.riesgos.map(r => `<li style="padding: 4px 0; color: var(--color-text-dim);">• ${r}</li>`).join('')}
+                        </ul>
+                    `;
+                }
+            }
+        });
     </script>
 </body>
 </html>
