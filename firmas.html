@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeSSTia - Firmas</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="dashboard-layout">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2>GeSSTia</h2>
+            <span style="color: var(--color-text-dim); font-size: 0.75rem;">SST Chile 2026</span>
+        </div>
+        <nav>
+            <ul class="main-nav">
+                <li><a href="dashboard.html" class="nav-link" data-section="dashboard"><span class="icon">🏠</span> Dashboard</a></li>
+                <li><a href="trabajadores.html" class="nav-link" data-section="trabajadores"><span class="icon">👷</span> Trabajadores</a></li>
+                <li><a href="iper.html" class="nav-link" data-section="iper"><span class="icon">⚠️</span> IPER / IRL</a></li>
+                <li><a href="capacitaciones.html" class="nav-link" data-section="capacitaciones"><span class="icon">🎓</span> Capacitaciones</a></li>
+                <li><a href="contratistas.html" class="nav-link" data-section="contratistas"><span class="icon">🤝</span> Contratistas</a></li>
+                <li><a href="firmas.html" class="nav-link" data-section="firmas"><span class="icon">✍️</span> Firmas Digitales</a></li>
+                <li><a href="empresa.html" class="nav-link" data-section="empresa"><span class="icon">🏢</span> Mi Empresa</a></li>
+                <li><a href="reportes.html" class="nav-link" data-section="reportes"><span class="icon">📊</span> Reportes</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <div class="main-wrapper">
+        <header class="topbar">
+            <div class="page-title">
+                <h1>Firmas</h1>
+            </div>
+            <div class="user-menu">
+                <span class="user-name" id="user-name">Usuario</span>
+                <div class="user-avatar" id="user-avatar">U</div>
+                <button class="btn-logout" onclick="doLogout()" title="Cerrar sesión">🚪</button>
+            </div>
+        </header>
+        <main class="content-area">
+            <div class="section-card" style="text-align:center; padding:60px 20px;">
+                <div style="font-size:4rem; margin-bottom:20px;">🚧</div>
+                <h2 style="color:var(--color-text); margin-bottom:12px;">Firmas</h2>
+                <p style="color:var(--color-text-dim); max-width:500px; margin:0 auto;">
+                    Este módulo estará disponible próximamente.<BR/>
+                    Estamos desarrollando todas las funcionalidades paso a paso.
+                </p>
+                <a href="dashboard.html" class="btn btn-primary" style="width:auto; margin-top:24px; display:inline-flex;">
+                    ← Volver al Dashboard
+                </a>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/data.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        checkAuth();
+        loadUserData();
+        setActiveNav();
+    </script>
+</body>
+</html>
