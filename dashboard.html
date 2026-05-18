@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeSSTia - Dashboard</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="dashboard-layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2>GeSSTia</h2>
+            <span style="color: var(--color-text-dim); font-size: 0.75rem;">SST Chile 2026</span>
+        </div>
+        
+        <nav>
+            <ul class="main-nav">
+                <li><a href="dashboard.html" class="nav-link active" data-section="dashboard"><span class="icon">🏠</span> Dashboard</a></li>
+                <li><a href="trabajadores.html" class="nav-link" data-section="trabajadores"><span class="icon">👷</span> Trabajadores</a></li>
+                <li><a href="iper.html" class="nav-link" data-section="iper"><span class="icon">⚠️</span> IPER / IRL</a></li>
+                <li><a href="capacitaciones.html" class="nav-link" data-section="capacitaciones"><span class="icon">🎓</span> Capacitaciones</a></li>
+                <li><a href="contratistas.html" class="nav-link" data-section="contratistas"><span class="icon">🤝</span> Contratistas</a></li>
+                <li><a href="firmas.html" class="nav-link" data-section="firmas"><span class="icon">✍️</span> Firmas Digitales</a></li>
+                <li><a href="empresa.html" class="nav-link" data-section="empresa"><span class="icon">🏢</span> Mi Empresa</a></li>
+                <li><a href="reportes.html" class="nav-link" data-section="reportes"><span class="icon">📊</span> Reportes</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-wrapper">
+        <header class="topbar">
+            <div class="page-title">
+                <h1>Dashboard Principal</h1>
+            </div>
+            <div class="user-menu">
+                <span class="user-name" id="user-name">Usuario</span>
+                <div class="user-avatar" id="user-avatar">U</div>
+                <button class="btn-logout" onclick="doLogout()" title="Cerrar sesión">🚪</button>
+            </div>
+        </header>
+
+        <main class="content-area">
+            
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <a href="trabajadores.html" class="stat-card">
+                    <div class="stat-icon blue">👷</div>
+                    <div>
+                        <div class="stat-number" id="stat-trabajadores">6</div>
+                        <div class="stat-label">Trabajadores</div>
+                    </div>
+                </a>
+                
+                <a href="iper.html" class="stat-card">
+                    <div class="stat-icon red">⚠️</div>
+                    <div>
+                        <div class="stat-number" id="stat-riesgos">3</div>
+                        <div class="stat-label">Riesgos Críticos</div>
+                    </div>
+                </a>
+                
+                <a href="capacitaciones.html" class="stat-card">
+                    <div class="stat-icon green">🎓</div>
+                    <div>
+                        <div class="stat-number" id="stat-capacitaciones">6</div>
+                        <div class="stat-label">Capacitaciones</div>
+                    </div>
+                </a>
+                
+                <a href="firmas.html" class="stat-card">
+                    <div class="stat-icon orange">✍️</div>
+                    <div>
+                        <div class="stat-number" id="stat-firmas">1</div>
+                        <div class="stat-label">Firmas Pendientes</div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <a href="trabajadores.html" class="btn-action">➕ Nuevo Trabajador</a>
+                <a href="iper.html" class="btn-action">⚠️ Generar IPER</a>
+                <a href="capacitaciones.html" class="btn-action">🎓 Nueva Capacitación</a>
+                <a href="contratistas.html" class="btn-action">🤝 Vincular Contratista</a>
+            </div>
+
+            <!-- Main Sections -->
+            <div class="section-row">
+                
+                <!-- Tareas Pendientes -->
+                <div class="section-card">
+                    <h3>📋 Tareas Pendientes</h3>
+                    <ul class="task-list" id="task-list">
+                        <!-- Se llena con JS -->
+                    </ul>
+                </div>
+
+                <!-- Cumplimiento Normativo -->
+                <div class="section-card">
+                    <h3>📈 Cumplimiento Normativo</h3>
+                    <div id="compliance-container">
+                        <!-- Se llena con JS -->
+                    </div>
+                </div>
+                
+            </div>
+
+        </main>
+    </div>
+
+    <script src="js/data.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        // Verificar autenticación
+        checkAuth();
+        loadUserData();
+        setActiveNav();
+        
+        // Cargar tareas
+        function loadTasks() {
+            const list = document.getElementById('task-list');
+            if (!list) return;
+            
+            list.innerHTML = (DATOS_DEMO.tareas || []).map(t => {
+                const priorityClass = t.prioridad === 'alta' ? 'alta' : t.prioridad === 'media' ? 'media' : 'baja';
+                return `<li class="task-item">
+                    <span class="task-priority ${priorityClass}"></span>
+                    <span class="task-text">${t.titulo}</span>
+                    <span class="task-date">${t.fecha}</span>
+                </li>`;
+            }).join('');
+        }
+        
+        // Cargar cumplimiento
+        function loadCompliance() {
+            const container = document.getElementById('compliance-container');
+            if (!container) return;
+            
+            const norms = [
+                { name: 'DS 44', value: 85 },
+                { name: 'DS 594', value: 92 },
+                { name: 'Ley 16744', value: 78 }
+            ];
+            
+            container.innerHTML = norms.map(n => `
+                <div class="compliance-item">
+                    <div class="compliance-label">${n.name}</div>
+                    <div class="compliance-bar">
+                        <div class="compliance-fill" style="width: ${n.value}%"></div>
+                    </div>
+                    <div class="compliance-value">${n.value}%</div>
+                </div>
+            `).join('');
+        }
+        
+        // Inicializar
+        loadTasks();
+        loadCompliance();
+    </script>
+</body>
+</html>
