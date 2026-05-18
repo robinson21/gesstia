@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GeSSTia - IPER/IL (DS 44 + ISP Chile)</title>
+    <title>GeSSTia - IPER/IL (Guía ISP Chile 1-2-4)</title>
     <link rel="stylesheet" href="css/styles.css">
     <style>
         .main-wrapper { margin-left: 0 !important; }
@@ -11,7 +11,7 @@
             .main-wrapper { margin-left: 260px !important; }
         }
         
-        /* Matriz IPER 5x5 ISP */
+        /* Matriz IPER 3x3 ISP Chile */
         .matriz-container {
             background: var(--color-card);
             border: 1px solid var(--color-border);
@@ -23,8 +23,8 @@
         
         .matriz-grid {
             display: grid;
-            grid-template-columns: 80px repeat(5, 1fr);
-            gap: 4px;
+            grid-template-columns: 100px repeat(3, 1fr);
+            gap: 8px;
             max-width: 500px;
             margin: 0 auto;
         }
@@ -44,13 +44,12 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            border-radius: 6px;
-            font-size: 0.7rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
             font-weight: 700;
             color: white;
             cursor: pointer;
             transition: transform 0.2s;
-            position: relative;
         }
         
         .matriz-cell:hover {
@@ -58,27 +57,17 @@
             z-index: 10;
         }
         
-        .matriz-cell .nota {
-            font-size: 1.1rem;
-        }
-        
-        .matriz-cell .nivel-text {
-            font-size: 0.6rem;
-            text-transform: uppercase;
-            opacity: 0.9;
-        }
-        
-        .cell-bajo { background: linear-gradient(135deg, #27ae60, #2ecc71); }
-        .cell-medio { background: linear-gradient(135deg, #f39c12, #f1c40f); color: #333; }
-        .cell-alto { background: linear-gradient(135deg, #e67e22, #f39c12); }
+        .cell-tolerable { background: linear-gradient(135deg, #27ae60, #2ecc71); }
+        .cell-bajo { background: linear-gradient(135deg, #f1c40f, #f39c12); color: #333; }
+        .cell-importante { background: linear-gradient(135deg, #e67e22, #d35400); }
         .cell-critico { background: linear-gradient(135deg, #c0392b, #e74c3c); }
         
         .matriz-header {
             text-align: center;
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             color: var(--color-text-dim);
             font-weight: 600;
-            padding: 8px 4px;
+            padding: 12px 4px;
         }
         
         .matriz-legend {
@@ -101,11 +90,7 @@
             border-radius: 4px;
         }
         
-        /* Sección CCDS (Contexto, Comunicación, Documentación, Sistematización) */
-        .ccds-section {
-            margin-top: 32px;
-        }
-        
+        /* CCDS */
         .ccds-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -137,48 +122,11 @@
             color: var(--color-text-dim);
         }
         
-        /* Acciones correctivas */
-        .acciones-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 16px;
+        @media (max-width: 768px) {
+            .ccds-grid { grid-template-columns: 1fr 1fr; }
+            .matriz-grid { max-width: 320px; }
         }
         
-        .acciones-table th,
-        .acciones-table td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid var(--color-border);
-            font-size: 0.85rem;
-        }
-        
-        .acciones-table th {
-            background: var(--color-secondary);
-            font-weight: 600;
-            color: var(--color-text-dim);
-            text-transform: uppercase;
-            font-size: 0.75rem;
-            letter-spacing: 0.5px;
-        }
-        
-        .acciones-table td {
-            color: var(--color-text);
-        }
-        
-        .badge-plazo {
-            display: inline-flex;
-            align-items: center;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 0.7rem;
-            font-weight: 600;
-        }
-        
-        .plazo-vencer { background: rgba(243,156,18,0.2); color: #f39c12; }
-        .plazo-cumplido { background: rgba(46,204,113,0.2); color: #2ecc71; }
-        .plazo-vencido { background: rgba(231,76,60,0.2); color: #e74c3c; }
-        
-        /* Formula IPER */
         .formula-box {
             background: linear-gradient(135deg, rgba(52,152,219,0.1), rgba(155,89,182,0.05));
             border: 1px solid rgba(52,152,219,0.2);
@@ -202,13 +150,6 @@
             padding: 16px;
             background: rgba(0,0,0,0.2);
             border-radius: 8px;
-        }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            .ccds-grid { grid-template-columns: 1fr 1fr; }
-            .matriz-grid { max-width: 300px; }
-            .matriz-grid .matriz-cell .nota { font-size: 0.8rem; }
         }
     </style>
 </head>
@@ -234,7 +175,7 @@
         </nav>
     </aside>
 
-    <!-- Notificación Toast -->
+    <!-- Toast -->
     <div id="toast" class="toast" style="display:none;">
         <span id="toast-message"></span>
     </div>
@@ -243,7 +184,7 @@
     <div class="main-wrapper">
         <header class="topbar">
             <div class="page-title">
-                <h1>⚠️ IPER / IRL — DS 44 + ISP Chile</h1>
+                <h1>⚠️ IPER / IRL — Guía ISP Chile (1-2-4)</h1>
             </div>
             <div class="user-menu">
                 <span class="user-name" id="user-name">Usuario</span>
@@ -256,38 +197,65 @@
             
             <!-- Formula IPER ISP -->
             <div class="formula-box">
-                <h4>📐 Ficha Técnica GTI/IPER/001 — Instituto de Seguridad Pública de Chile</h4>
+                <h4>📐 Guía Técnica IPER — Instituto de Seguridad Pública de Chile</h4>
                 <div class="formula">
-                    NIVEL DE RIESGO = Probabilidad × Consecuencia (1 — 25)
+                    VEP = Probabilidad × Consecuencia (Valores: 1, 2, 4)
                 </div>
                 <p style="text-align: center; margin-top: 12px; color: var(--color-text-dim); font-size: 0.85rem; font-family: var(--font-primary);">
-                    Base Legal: D.S. N° 44/2024 Art. 23, 50 | Ley 16.744 | Guía GTI/IPER/001
+                    VEP: 1, 2, 4, 8, 16 | Base Legal: D.S. N° 44/2024 Art. 23, 50 | Ley 16.744
                 </p>
             </div>
 
-            <!-- Matriz IPER 5x5 -->
+            <!-- Matriz IPER 3x3 -->
             <div class="matriz-container">
-                <h3 style="text-align: center; margin-bottom: 16px;">🎯 Matriz de Identificación de Peligros y Evaluación de Riesgos</h3>
+                <h3 style="text-align: center; margin-bottom: 16px;">🎯 Matriz IPER 3×3 (Guía ISP Chile)</h3>
                 <p style="text-align: center; color: var(--color-text-dim); font-size: 0.85rem; margin-bottom: 20px;">
-                    Metodología IPER — Instituto de Seguridad Pública de Chile (ISP)
+                    Valores: Probabilidad 1-2-4 | Consecuencia 1-2-4 | VEP = 1 a 16
                 </p>
                 
                 <div style="text-align: center; font-size: 0.8rem; color: var(--color-text-dim); margin-bottom: 12px;">CONSECUENCIA</div>
                 <div class="matriz-grid" id="matriz-visual">
-                    <!-- Se llena dinámicamente -->
+                    <div class="matriz-label"></div>
+                    <div class="matriz-header">1<br><small>Ligeramente dañino</small></div>
+                    <div class="matriz-header">2<br><small>Dañino</small></div>
+                    <div class="matriz-header">4<br><small>Extremadamente dañino</small></div>
+                    
+                    <div class="matriz-label" style="flex-direction: column;">
+                        <span>4</span>
+                        <span style="font-size: 0.65rem;">Alta</span>
+                    </div>
+                    <div class="matriz-cell cell-bajo">4<br><small>BAJO</small></div>
+                    <div class="matriz-cell cell-importante">8<br><small>IMPORTANTE</small></div>
+                    <div class="matriz-cell cell-critico">16<br><small>CRÍTICO</small></div>
+                    
+                    <div class="matriz-label" style="flex-direction: column;">
+                        <span>2</span>
+                        <span style="font-size: 0.65rem;">Media</span>
+                    </div>
+                    <div class="matriz-cell cell-tolerable">2<br><small>TOLERABLE</small></div>
+                    <div class="matriz-cell cell-bajo">4<br><small>BAJO</small></div>
+                    <div class="matriz-cell cell-importante">8<br><small>IMPORTANTE</small></div>
+                    
+                    <div class="matriz-label" style="flex-direction: column;">
+                        <span>1</span>
+                        <span style="font-size: 0.65rem;">Baja</span>
+                    </div>
+                    <div class="matriz-cell cell-tolerable">1<br><small>TOLERABLE</small></div>
+                    <div class="matriz-cell cell-tolerable">2<br><small>TOLERABLE</small></div>
+                    <div class="matriz-cell cell-bajo">4<br><small>BAJO</small></div>
                 </div>
                 
                 <div class="matriz-legend">
-                    <div class="legend-item"><div class="legend-color" style="background: #2ecc71;"></div>Bajo (1-6)</div>
-                    <div class="legend-item"><div class="legend-color" style="background: #f1c40f;"></div>Medio (7-12)</div>
-                    <div class="legend-item"><div class="legend-color" style="background: #f39c12;"></div>Alto (13-19)</div>
-                    <div class="legend-item"><div class="legend-color" style="background: #e74c3c;"></div>Crítico (20-25)</div>
+                    <div class="legend-item"><div class="legend-color" style="background: #2ecc71;"></div>Tolerable (1-2)</div>
+                    <div class="legend-item"><div class="legend-color" style="background: #f1c40f;"></div>Bajo (4)</div>
+                    <div class="legend-item"><div class="legend-color" style="background: #e67e22;"></div>Importante (8)</div>
+                    <div class="legend-item"><div class="legend-color" style="background: #e74c3c;"></div>Crítico (16)</div>
                 </div>
             </div>
 
             <!-- CCDS -->
-            <div class="ccds-section">
-                <h3 style="margin-bottom: 16px;">🔄 Metodología CCDS (Contexto, Comunicación, Documentación, Sistematización)</h3>
+            <div style="margin-top: 32px;">
+                <h3 style="margin-bottom: 16px;">🔄 Metodología CCDS</h3>
                 <div class="ccds-grid">
                     <div class="ccds-card">
                         <div class="icon">🏢</div>
@@ -297,7 +265,7 @@
                     <div class="ccds-card">
                         <div class="icon">💬</div>
                         <h4>Comunicación</h4>
-                        <p>Stakeholders: Trabajadores, CPHS, Gerencia, Subcontratistas</p>
+                        <p>CPHS, Trabajadores<br>Gerencia, Subcontratistas</p>
                     </div>
                     <div class="ccds-card">
                         <div class="icon">📋</div>
@@ -315,20 +283,20 @@
             <!-- Stats -->
             <div class="stats-grid" style="margin-bottom: 24px;">
                 <div class="stat-card" style="cursor: default;">
+                    <div class="stat-icon green">✅</div>
+                    <div><div class="stat-number" id="count-tolerable">0</div><div class="stat-label">Tolerable (1-2)</div></div>
+                </div>
+                <div class="stat-card" style="cursor: default;">
+                    <div class="stat-icon" style="background: rgba(241,196,15,0.15);">⚠️</div>
+                    <div><div class="stat-number" id="count-bajo">0</div><div class="stat-label">Bajo (4)</div></div>
+                </div>
+                <div class="stat-card" style="cursor: default;">
+                    <div class="stat-icon orange">🔶</div>
+                    <div><div class="stat-number" id="count-importante">0</div><div class="stat-label">Importante (8)</div></div>
+                </div>
+                <div class="stat-card" style="cursor: default;">
                     <div class="stat-icon red">🔴</div>
-                    <div><div class="stat-number" id="count-critico">0</div><div class="stat-label">Críticos (20-25)</div></div>
-                </div>
-                <div class="stat-card" style="cursor: default;">
-                    <div class="stat-icon orange">🟠</div>
-                    <div><div class="stat-number" id="count-alto">0</div><div class="stat-label">Altos (13-19)</div></div>
-                </div>
-                <div class="stat-card" style="cursor: default;">
-                    <div class="stat-icon" style="background: rgba(241,196,15,0.15);">🟡</div>
-                    <div><div class="stat-number" id="count-medio">0</div><div class="stat-label">Medios (7-12)</div></div>
-                </div>
-                <div class="stat-card" style="cursor: default;">
-                    <div class="stat-icon green">🟢</div>
-                    <div><div class="stat-number" id="count-bajo">0</div><div class="stat-label">Bajos (1-6)</div></div>
+                    <div><div class="stat-number" id="count-critico">0</div><div class="stat-label">Crítico (16)</div></div>
                 </div>
             </div>
 
@@ -343,69 +311,43 @@
                 <div class="toolbar-left">
                     <div class="search-box">
                         <span class="search-icon">🔍</span>
-                        <input type="text" id="search-input" placeholder="Buscar peligro o riesgo..." oninput="filterRisks()">
+                        <input type="text" id="search-input" placeholder="Buscar peligro..." oninput="filterRisks()">
                     </div>
                     <select class="filter-select" id="filter-nivel" onchange="filterRisks()">
-                        <option value="">Todos niveles</option>
-                        <option value="critico">Crítico (20-25)</option>
-                        <option value="alto">Alto (13-19)</option>
-                        <option value="medio">Medio (7-12)</option>
-                        <option value="bajo">Bajo (1-6)</option>
+                        <option value="">Todos</option>
+                        <option value="tolerable">Tolerable (1-2)</option>
+                        <option value="bajo">Bajo (4)</option>
+                        <option value="importante">Importante (8)</option>
+                        <option value="critico">Crítico (16)</option>
                     </select>
                 </div>
             </div>
 
-            <!-- Tabla IPER con acciones correctivas -->
+            <!-- Tabla IPER -->
             <div class="section-card" style="padding: 0; overflow: hidden;">
                 <table class="data-table">
                     <thead>
                         <tr>
                             <th>Peligro</th>
                             <th>Riesgo</th>
-                            <th>PxC</th>
-                            <th>Nota</th>
+                            <th>P</th>
+                            <th>C</th>
+                            <th>VEP</th>
                             <th>Nivel</th>
                             <th>Control</th>
-                            <th>Responsable</th>
-                            <th>Plazo</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
-                    <tbody id="iper-table-body">
-                        <!-- Se llena dinámicamente -->
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Acciones Correctivas -->
-            <div class="section-card" style="margin-top: 24px;">
-                <h3>✅ Plan de Acción Correctiva (DS 44 Art. 23)</h3>
-                <p style="color: var(--color-text-dim); font-size: 0.85rem; margin-bottom: 16px;">
-                    Las acciones correctivas son obligatorias para riesgos Críticos (20-25) y Altos (13-19). 
-                    Plazo máximo: 30 días para críticos, 60 días para altos.
-                </p>
-                <table class="acciones-table">
-                    <thead>
-                        <tr>
-                            <th>Riesgo</th>
-                            <th>Acción Correctiva</th>
-                            <th>Responsable</th>
-                            <th>Plazo</th>
-                            <th>Estado</th>
-                        </tr>
-                    </thead>
-                    <tbody id="acciones-table-body">
-                        <!-- Se llena dinámicamente -->
-                    </tbody>
+                    <tbody id="iper-table-body"></tbody>
                 </table>
             </div>
 
         </main>
     </div>
 
-    <!-- Modal: Crear/Editar IPER -->
+    <!-- Modal Form -->
     <div class="modal-overlay" id="modal-form">
-        <div class="modal-container" style="max-width: 800px;">
+        <div class="modal-container" style="max-width: 700px;">
             <div class="modal-header">
                 <h2 id="modal-title">Nuevo Peligro/Riesgo</h2>
                 <button class="btn-close" onclick="closeModal()">×</button>
@@ -418,45 +360,47 @@
                     <div class="form-grid">
                         <div class="form-group full-width">
                             <label for="r-peligro">Peligro Detectado *</label>
-                            <input type="text" id="r-peligro" placeholder="Ej: Caída en altura desde andamio" required>
+                            <input type="text" id="r-peligro" placeholder="Ej: Caída desde altura" required>
                         </div>
                         <div class="form-group full-width">
-                            <label for="r-riesgo">Riesgo Asociado (Consecuencia) *</label>
-                            <textarea id="r-riesgo" rows="2" placeholder="Ej: Fracturas múltiples, incapacidad permanente o muerte" required></textarea>
+                            <label for="r-riesgo">Riesgo Asociado *</label>
+                            <textarea id="r-riesgo" rows="2" placeholder="Consecuencia potencial..." required></textarea>
                         </div>
                     </div>
 
-                    <div class="section-title" style="margin-top: 24px;">🎯 Evaluación IPER</div>
+                    <div class="section-title" style="margin-top: 24px;">🎯 Evaluación IPER (Valores 1-2-4)</div>
                     <div class="form-grid">
                         <div class="form-group">
-                            <label>Probabilidad (1-5): <span class="slider-value" id="prob-val">3</span></label>
-                            <input type="range" id="r-probabilidad" min="1" max="5" value="3" oninput="updateCalc()">
-                            <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--color-text-dim); margin-top: 4px;">
-                                <span>Improbable</span><span>Posible</span><span>Casi seguro</span>
-                            </div>
+                            <label>Probabilidad</label>
+                            <select id="r-probabilidad" onchange="updateCalc()" style="width: 100%; padding: 10px; border-radius: 6px; background: var(--color-card); color: var(--color-text); border: 1px solid var(--color-border);">
+                                <option value="1">1 - Baja</option>
+                                <option value="2">2 - Media</option>
+                                <option value="4">4 - Alta</option>
+                            </select>
                         </div>
                         <div class="form-group">
-                            <label>Consecuencia (1-5): <span class="slider-value" id="cons-val">3</span></label>
-                            <input type="range" id="r-consecuencia" min="1" max="5" value="3" oninput="updateCalc()">
-                            <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--color-text-dim); margin-top: 4px;">
-                                <span>Leve</span><span>Moderada</span><span>Catastrófica</span>
-                            </div>
+                            <label>Consecuencia</label>
+                            <select id="r-consecuencia" onchange="updateCalc()" style="width: 100%; padding: 10px; border-radius: 6px; background: var(--color-card); color: var(--color-text); border: 1px solid var(--color-border);">
+                                <option value="1">1 - Ligeramente dañino</option>
+                                <option value="2">2 - Dañino</option>
+                                <option value="4">4 - Extremadamente dañino</option>
+                            </select>
                         </div>
                     </div>
 
-                    <div id="nivel-result" style="text-align: center; padding: 16px; margin: 16px 0; border-radius: 8px; font-size: 1.2rem; font-weight: 700;">
-                        NOTA IPER: <span id="nota-num">9</span> — <span id="nivel-texto">MEDIO</span>
+                    <div id="nivel-result" style="text-align: center; padding: 16px; margin: 16px 0; border-radius: 8px; font-size: 1.2rem; font-weight: 700; background: rgba(46,204,113,0.2); color: #2ecc71;">
+                        VEP: <span id="vep-num">1</span> — <span id="nivel-texto">TOLERABLE</span>
                     </div>
 
                     <div class="section-title" style="margin-top: 24px;">🛡️ Control y Acciones</div>
                     <div class="form-grid">
                         <div class="form-group full-width">
-                            <label for="r-control">Control Preventivo Implementado</label>
-                            <textarea id="r-control" rows="2" placeholder="Describa las medidas de control actuales..."></textarea>
+                            <label for="r-control">Control Preventivo</label>
+                            <textarea id="r-control" rows="2" placeholder="Medidas actuales..." required></textarea>
                         </div>
                         <div class="form-group full-width">
-                            <label for="r-correctiva">Acción Correctiva (requerida para riesgos ≥ 13)</label>
-                            <textarea id="r-correctiva" rows="2" placeholder="Si nota ≥ 13, describe la acción correctiva obligatoria..."></textarea>
+                            <label for="r-correctiva">Acción Correctiva (si VEP ≥ 8)</label>
+                            <textarea id="r-correctiva" rows="2" placeholder="Si VEP ≥ 8, describe acción..."></textarea>
                         </div>
                         <div class="form-group">
                             <label for="r-responsable">Responsable</label>
@@ -466,151 +410,112 @@
                             <label for="r-plazo">Plazo</label>
                             <input type="date" id="r-plazo">
                         </div>
-                        <div class="form-group full-width">
-                            <label for="r-legal">Marco Legal (DS 44 / DS 594)</label>
-                            <input type="text" id="r-legal" placeholder="Ej: DS 594 Art. 25, D.S. N° 44/2024 Art. 23">
-                        </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
-                <button class="btn-primary-sm" onclick="saveIPER()">💾 Guardar en Matriz IPER</button>
+                <button class="btn-primary-sm" onclick="saveIPER()">💾 Guardar</button>
             </div>
         </div>
     </div>
 
-    <!-- Modal: Ver Detalle -->
+    <!-- Modal View -->
     <div class="modal-overlay" id="modal-view">
         <div class="modal-container" style="max-width: 650px;">
-            <div class="modal-header">
-                <h2>⚠️ Ficha IPER — Detalle</h2>
-                <button class="btn-close" onclick="closeViewModal()">×</button>
-            </div>
+            <div class="modal-header"><h2>⚠️ Detalle IPER</h2><button class="btn-close" onclick="closeViewModal()">×</button></div>
             <div class="modal-body" id="view-content"></div>
-            <div class="modal-footer">
-                <button class="btn-primary-sm" onclick="closeViewModal()">Cerrar</button>
-            </div>
+            <div class="modal-footer"><button class="btn-primary-sm" onclick="closeViewModal()">Cerrar</button></div>
         </div>
     </div>
 
     <script src="js/data.js"></script>
     <script src="js/app.js"></script>
     <script>
-        // Matriz IPER ISP: Probabilidad (1-5) x Consecuencia (1-5) = Nota (1-25)
-        const MATRIZ_IPER = {
-            calcularNota: (p, c) => p * c,
-            calcularNivel: (nota) => {
-                if (nota >= 20) return 'critico';
-                if (nota >= 13) return 'alto';
-                if (nota >= 7) return 'medio';
-                return 'bajo';
+        const ESCALA_IPER = {
+            valores: [1, 2, 4],
+            calcularVEP: (p, c) => p * c,
+            calcularNivel: (vep) => {
+                if (vep <= 2) return 'tolerable';
+                if (vep === 4) return 'bajo';
+                if (vep === 8) return 'importante';
+                return 'critico';
             }
         };
 
-        // Inicializar
         document.addEventListener('DOMContentLoaded', function() {
             checkAuth();
             loadUserData();
             setActiveNav();
-            renderMatriz();
-            renderRisks();
             updateStats();
-            renderAcciones();
+            renderRisks();
         });
 
-        // Renderizar matriz visual 5x5
-        function renderMatriz() {
-            const grid = document.getElementById('matriz-visual');
-            let html = '<div class="matriz-label"></div>';
-            
-            // Headers consecuencia
-            for (let c = 1; c <= 5; c++) {
-                html += `<div class="matriz-header">${c}</div>`;
-            }
-            
-            for (let p = 5; p >= 1; p--) {
-                html += `<div class="matriz-label">${p}</div>`;
-                for (let c = 1; c <= 5; c++) {
-                    const nota = p * c;
-                    const nivel = MATRIZ_IPER.calcularNivel(nota);
-                    const cellClass = nivel === 'critico' ? 'cell-critico' : nivel === 'alto' ? 'cell-alto' : nivel === 'medio' ? 'cell-medio' : 'cell-bajo';
-                    
-                    html += `
-                        <div class="matriz-cell ${cellClass}" title="Prob: ${p}, Cons: ${c}">
-                            <span class="nota">${nota}</span>
-                            <span class="nivel-text">${nivel.substring(0,1).toUpperCase()}</span>
-                        </div>
-                    `;
-                }
-            }
-            
-            grid.innerHTML = html;
-        }
-
-        // Obtener riesgos
         function getRisks() {
             const stored = localStorage.getItem('gesstia_riesgos');
             if (stored) return JSON.parse(stored);
-            return DATOS_DEMO.iper.riesgos || [];
+            // Datos demo según ISP Chile con VEP 1-2-4-8-16
+            return [
+                { id: 'r-001', peligro: 'Caída en altura', riesgo: 'Fracturas, incapacidad permanente', probabilidad: 4, consecuencia: 4, nivel: 'critico', control: 'Arnés y línea de vida', correctiva: 'Revisión mensual de equipos', responsable: 'Jefe SST', plazo: '' },
+                { id: 'r-002', peligro: 'Proyección de partículas', riesgo: 'Lesiones oculares graves', probabilidad: 2, consecuencia: 4, nivel: 'importante', control: 'Gafas de seguridad', correctiva: 'Dotación obligatoria', responsable: 'Supervisor', plazo: '' },
+                { id: 'r-003', peligro: 'Ruido excesivo', riesgo: 'Hipoacusia profesional', probabilidad: 2, consecuencia: 2, nivel: 'tolerable', control: 'Protectores auditivos', correctiva: 'Monitorización trimestral', responsable: 'Jefe SST', plazo: '' },
+                { id: 'r-004', peligro: 'Manipulación de cargas', riesgo: 'Dolores lumbares crónicos', probabilidad: 4, consecuencia: 2, nivel: 'bajo', control: 'Técnica de levantamiento', correctiva: 'Capacitación anual', responsable: 'RRHH', plazo: '' },
+                { id: 'r-005', peligro: 'Sustancias químicas', riesgo: 'Dermatitis o intoxicación', probabilidad: 1, consecuencia: 4, nivel: 'bajo', control: 'Guantes y ventilación', correctiva: 'Revisión de MSDS', responsable: 'Jefe SST', plazo: '' }
+            ];
         }
 
         function saveRisksList(risks) {
             localStorage.setItem('gesstia_riesgos', JSON.stringify(risks));
         }
 
-        // Actualizar cálculo en tiempo real
         function updateCalc() {
             const prob = parseInt(document.getElementById('r-probabilidad').value);
             const cons = parseInt(document.getElementById('r-consecuencia').value);
-            const nota = MATRIZ_IPER.calcularNota(prob, cons);
-            const nivel = MATRIZ_IPER.calcularNivel(nota);
-            
-            document.getElementById('prob-val').textContent = prob;
-            document.getElementById('cons-val').textContent = cons;
-            document.getElementById('nota-num').textContent = nota;
+            const vep = ESCALA_IPER.calcularVEP(prob, cons);
+            const nivel = ESCALA_IPER.calcularNivel(vep);
+
+            document.getElementById('vep-num').textContent = vep;
             document.getElementById('nivel-texto').textContent = nivel.toUpperCase();
-            
+
             const preview = document.getElementById('nivel-result');
             const colors = {
-                'critico': { bg: 'rgba(231,76,60,0.2)', text: '#ff6b6b' },
-                'alto': { bg: 'rgba(243,156,18,0.2)', text: '#f39c12' },
-                'medio': { bg: 'rgba(241,196,15,0.2)', text: '#f1c40f' },
-                'bajo': { bg: 'rgba(46,204,113,0.2)', text: '#2ecc71' }
+                'tolerable': { bg: 'rgba(46,204,113,0.2)', text: '#2ecc71' },
+                'bajo': { bg: 'rgba(241,196,15,0.2)', text: '#f1c40f' },
+                'importante': { bg: 'rgba(230,126,34,0.2)', text: '#e67e22' },
+                'critico': { bg: 'rgba(231,76,60,0.2)', text: '#e74c3c' }
             };
-            const col = colors[nivel];
+            const col = colors[nivel] || colors['tolerable'];
             preview.style.background = col.bg;
             preview.style.color = col.text;
         }
 
-        // Renderizar tabla
         function renderRisks() {
             const risks = getRisks();
             const tbody = document.getElementById('iper-table-body');
             const search = document.getElementById('search-input')?.value.toLowerCase() || '';
             const nivelFilter = document.getElementById('filter-nivel')?.value || '';
-            
+
             let filtered = [...risks];
             if (search) filtered = filtered.filter(r => (r.peligro + r.riesgo).toLowerCase().includes(search));
             if (nivelFilter) filtered = filtered.filter(r => r.nivel === nivelFilter);
-            
+
             if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding: 40px; color: var(--color-text-dim);">No se encontraron registros</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 40px; color: var(--color-text-dim);">Sin registros</td></tr>`;
                 return;
             }
-            
+
             tbody.innerHTML = filtered.map(r => {
                 const badgeClass = 'risk-' + r.nivel;
+                const vep = r.probabilidad * r.consecuencia;
                 return `
                     <tr onclick="viewRisk('${r.id}')" style="cursor: pointer;">
                         <td><strong>${r.peligro}</strong></td>
-                        <td>${r.riesgo.substring(0, 40)}${r.riesgo.length > 40 ? '...' : ''}</td>
-                        <td style="text-align: center;">${r.probabilidad}×${r.consecuencia}</td>
-                        <td style="text-align: center; font-weight: 700;">${r.probabilidad * r.consecuencia}</td>
+                        <td>${r.riesgo.substring(0, 35)}${r.riesgo.length > 35 ? '...' : ''}</td>
+                        <td style="text-align: center;">${r.probabilidad}</td>
+                        <td style="text-align: center;">${r.consecuencia}</td>
+                        <td style="text-align: center; font-weight: 700;">${vep}</td>
                         <td><span class="risk-badge ${badgeClass}">${r.nivel.toUpperCase()}</span></td>
-                        <td>${r.control ? r.control.substring(0, 30) + '...' : '-'}</td>
-                        <td>${r.responsable || '-'}</td>
-                        <td>${r.plazo || '-'}</td>
+                        <td>${r.control ? r.control.substring(0, 25) + '...' : '-'}</td>
                         <td onclick="event.stopPropagation()">
                             <div class="action-btns">
                                 <button class="btn-icon" onclick="viewRisk('${r.id}')" title="Ver">👁</button>
@@ -627,7 +532,7 @@
 
         function updateStats() {
             const risks = getRisks();
-            const map = { critico: 0, alto: 0, medio: 0, bajo: 0 };
+            const map = { tolerable: 0, bajo: 0, importante: 0, critico: 0 };
             risks.forEach(r => map[r.nivel]++);
             Object.keys(map).forEach(k => {
                 const el = document.getElementById('count-' + k);
@@ -635,48 +540,9 @@
             });
         }
 
-        // Acciones correctivas
-        function renderAcciones() {
-            const risks = getRisks().filter(r => r.nivel === 'critico' || r.nivel === 'alto');
-            const tbody = document.getElementById('acciones-table-body');
-            
-            if (risks.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--color-text-dim);">Sin acciones correctivas pendientes 🎉</td></tr>`;
-                return;
-            }
-            
-            tbody.innerHTML = risks.map(r => {
-                const hoy = new Date();
-                const plazo = r.plazo ? new Date(r.plazo) : null;
-                let estado = 'Pendiente';
-                let badgeClass = 'plazo-vencer';
-                
-                if (plazo) {
-                    const diff = Math.ceil((plazo - hoy) / (1000 * 60 * 60 * 24));
-                    if (diff < 0) { estado = 'Vencido'; badgeClass = 'plazo-vencido'; }
-                    else if (diff <= 7) { estado = 'Por vencer (' + diff + 'd)'; badgeClass = 'plazo-vencer'; }
-                    else { estado = 'En plazo'; badgeClass = 'plazo-cumplido'; }
-                }
-                
-                return `
-                    <tr>
-                        <td><strong>${r.peligro}</strong><br><span style="font-size: 0.8rem; color: var(--color-text-dim);">${r.riesgo.substring(0, 40)}</span></td>
-                        <td>${r.correctiva || r.control || 'Pendiente definición'}</td>
-                        <td>${r.responsable || 'Sin asignar'}</td>
-                        <td>${r.plazo || 'Sin fecha'}</td>
-                        <td><span class="badge-plazo ${badgeClass}">${estado}</span></td>
-                    </tr>
-                `;
-            }).join('');
-        }
-
-        // CRUD
         function openModal() {
-            editingId = null;
             document.getElementById('modal-title').textContent = 'Nuevo Peligro/Riesgo';
             document.getElementById('iper-form').reset();
-            document.getElementById('r-probabilidad').value = 3;
-            document.getElementById('r-consecuencia').value = 3;
             updateCalc();
             document.getElementById('modal-form').classList.add('active');
         }
@@ -693,45 +559,39 @@
             const correctiva = document.getElementById('r-correctiva').value.trim();
             const responsable = document.getElementById('r-responsable').value.trim();
             const plazo = document.getElementById('r-plazo').value;
-            const legal = document.getElementById('r-legal').value.trim();
-            
-            if (!peligro || !riesgo) { showToast('Complete los campos obligatorios', 'error'); return; }
-            
-            const nota = MATRIZ_IPER.calcularNota(prob, cons);
-            const nivel = MATRIZ_IPER.calcularNivel(nota);
-            
-            let risks = getRisks();
-            if (editingId) {
-                const idx = risks.findIndex(r => r.id === editingId);
-                if (idx >= 0) risks[idx] = { ...risks[idx], peligro, riesgo, probabilidad: prob, consecuencia: cons, nivel, control, correctiva, responsable, plazo, legal };
-                showToast('Registro IPER actualizado');
-            } else {
-                const newId = 'r-' + String(risks.length + 1).padStart(3, '0');
-                risks.push({ id: newId, peligro, riesgo, probabilidad: prob, consecuencia: cons, nivel, control, correctiva, responsable, plazo, legal });
-                showToast('Registro IPER creado');
+
+            if (!peligro || !riesgo || !control) {
+                showToast('Complete campos obligatorios', 'error');
+                return;
             }
-            
+
+            const vep = prob * cons;
+            const nivel = ESCALA_IPER.calcularNivel(vep);
+
+            let risks = getRisks();
+            const newId = 'r-' + String(risks.length + 1).padStart(3, '0');
+            risks.push({ id: newId, peligro, riesgo, probabilidad: prob, consecuencia: cons, nivel, control, correctiva, responsable, plazo });
+
             saveRisksList(risks);
+            showToast('Registro IPER creado');
             closeModal();
             renderRisks();
             updateStats();
-            renderAcciones();
         }
 
         function editRisk(id) {
             const r = getRisks().find(x => x.id === id);
             if (!r) return;
-            editingId = id;
+
             document.getElementById('modal-title').textContent = 'Editar IPER';
             document.getElementById('r-peligro').value = r.peligro;
             document.getElementById('r-riesgo').value = r.riesgo;
             document.getElementById('r-probabilidad').value = r.probabilidad;
             document.getElementById('r-consecuencia').value = r.consecuencia;
-            document.getElementById('r-control').value = r.control || '';
+            document.getElementById('r-control').value = r.control;
             document.getElementById('r-correctiva').value = r.correctiva || '';
             document.getElementById('r-responsable').value = r.responsable || '';
             document.getElementById('r-plazo').value = r.plazo || '';
-            document.getElementById('r-legal').value = r.legal || '';
             updateCalc();
             document.getElementById('modal-form').classList.add('active');
         }
@@ -739,38 +599,35 @@
         function viewRisk(id) {
             const r = getRisks().find(x => x.id === id);
             if (!r) return;
-            const nota = r.probabilidad * r.consecuencia;
-            
+            const vep = r.probabilidad * r.consecuencia;
+
             document.getElementById('view-content').innerHTML = `
                 <div class="detail-row"><div class="detail-label">Peligro</div><div class="detail-value"><strong>${r.peligro}</strong></div></div>
                 <div class="detail-row"><div class="detail-label">Riesgo</div><div class="detail-value">${r.riesgo}</div></div>
                 <div class="detail-row"><div class="detail-label">Probabilidad × Consecuencia</div><div class="detail-value">${r.probabilidad} × ${r.consecuencia}</div></div>
-                <div class="detail-row"><div class="detail-label">Nota IPER</div><div class="detail-value" style="font-size: 1.5rem; font-weight: 700;">${nota}/25</div></div>
+                <div class="detail-row"><div class="detail-label">VEP</div><div class="detail-value" style="font-size: 1.5rem; font-weight: 700;">${vep} / 16</div></div>
                 <div class="detail-row"><div class="detail-label">Nivel</div><div class="detail-value"><span class="risk-badge risk-${r.nivel}">${r.nivel.toUpperCase()}</span></div></div>
-                <div class="detail-row"><div class="detail-label">Control Preventivo</div><div class="detail-value">${r.control || '-'}</div></div>
+                <div class="detail-row"><div class="detail-label">Control</div><div class="detail-value">${r.control}</div></div>
                 <div class="detail-row"><div class="detail-label">Acción Correctiva</div><div class="detail-value">${r.correctiva || '-'}</div></div>
                 <div class="detail-row"><div class="detail-label">Responsable</div><div class="detail-value">${r.responsable || '-'}</div></div>
                 <div class="detail-row"><div class="detail-label">Plazo</div><div class="detail-value">${r.plazo || '-'}</div></div>
-                <div class="detail-row"><div class="detail-label">Marco Legal</div><div class="detail-value">${r.legal || '-'}</div></div>
             `;
             document.getElementById('modal-view').classList.add('active');
         }
 
         function deleteRisk(id) {
-            if (!confirm('¿Eliminar este registro IPER?')) return;
+            if (!confirm('¿Eliminar este registro?')) return;
             let risks = getRisks().filter(r => r.id !== id);
             saveRisksList(risks);
             showToast('Registro eliminado');
             renderRisks();
             updateStats();
-            renderAcciones();
         }
 
         function exportIPER() {
-            showToast('Exportando ficha IPER... (simulado)');
+            showToast('Exportando ficha IPER...');
         }
 
-        // Toast
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
             document.getElementById('toast-message').textContent = message;
