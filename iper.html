@@ -314,19 +314,21 @@
                     </select>
                 </div>
             </div>
-
             <!-- Tabla IPER -->
             <div class="section-card" style="padding: 0; overflow: hidden;">
                 <table class="data-table table-ipc">
                     <thead>
                         <tr>
-                            <th>Código</th>
-                            <th>Peligro</th>
+                            <th>Cód</th>
+                            <th>Peligro (Fuente)</th>
                             <th>Riesgo</th>
-                            <th>P</th>
-                            <th>C</th>
+                            <th>Cons</th>
+                            <th>Prob</th>
+                            <th>Sev</th>
                             <th>VEP</th>
                             <th>Nivel</th>
+                            <th>Cargo Evaluado</th>
+                            <th>Exp.</th>
                             <th>Control</th>
                             <th>Acciones</th>
                         </tr>
@@ -389,6 +391,18 @@
                         VEP: <span id="vep-num">1</span> — <span id="nivel-texto">TOLERABLE</span>
                     </div>
 
+                    <div class="section-title" style="margin-top: 24px;">👥 Alcance de Evaluación</div>
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label for="r-cargo">Cargo/Cargos Evaluados</label>
+                            <input type="text" id="r-cargo" placeholder="Ej: Albañil, Capataz, Ayudante de obra">
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="r-expuestos">Cantidad de Personas Expuestas</label>
+                            <input type="number" id="r-expuestos" placeholder="Ej: 12" min="1">
+                        </div>
+                    </div>
+
                     <div class="section-title" style="margin-top: 24px;">🛡️ Control y Acciones</div>
                     <div class="form-grid">
                         <div class="form-group full-width">
@@ -443,15 +457,15 @@
         // Peligros y Riesgos según documento ISP Chile
         const PELIGROS_ISP = [
             { codigo: 'A1', peligro: 'Caídas a distinto nivel (≤1,8m)', riesgo: 'Caída a plano inferior desde altura menor o igual a 1.8m', consecuencia: 'Fracturas, contusiones', probabilidad: 2, severidad: 4, control: 'Barandas, señalización' },
-            { codigo: 'A2', peligro: 'Caídas de altura (>1,8m)', riesgo: 'Caída a plano inferior desde altura mayor a 1.8m', consecuencia: 'Fracturas múltiples, incapacidad permanente', probabilidad: 2, severidad: 4, control: 'Arnés, línea de vida, barandas' },
-            { codigo: 'A3', peligro: 'Caídas al agua', riesgo: 'Caída a curso de agua o estructura con agua', consecuencia: 'Ahogamiento, hipotermia', probabilidad: 1, severidad: 4, control: 'Barandas, chalecos salvavidas' },
-            { codigo: 'A4', peligro: 'Atrapamiento mecánico', riesgo: 'Atrapamiento por mecanismos de máquinas', consecuencia: 'Amputaciones, fracturas', probabilidad: 2, severidad: 4, control: 'Guardas, protecciones' },
-            { codigo: 'B1', peligro: 'Caída de objetos', riesgo: 'Golpe por elementos que caen desde altura', consecuencia: 'Traumatismos craneoencefálicos', probabilidad: 2, severidad: 4, control: 'Casco de seguridad, delimitación' },
-            { codigo: 'B2', peligro: 'Cortes / Punzantes', riesgo: 'Contacto con objetos cortantes o punzantes', consecuencia: 'Cortes, desgarros', probabilidad: 4, severidad: 2, control: 'Guantes, botas con puntera' },
-            { codigo: 'B3', peligro: 'Choque contra objetos', riesgo: 'Impacto con objetos fijos o en movimiento', consecuencia: 'Contusiones, hematomas', probabilidad: 2, severidad: 2, control: 'Señalética, delimitación' },
-            { codigo: 'C1', peligro: 'Contacto animales/insectos', riesgo: 'Lesiones por mordiscos, picaduras', consecuencia: 'Envenenamiento, infecciones', probabilidad: 1, severidad: 2, control: 'EPP, procedimientos' },
-            { codigo: 'E1', peligro: 'Contactos térmicos por calor', riesgo: 'Quemaduras por superficies calientes', consecuencia: 'Quemaduras de I y II grado', probabilidad: 2, severidad: 2, control: 'Guantes térmicos, señalización' },
-            { codigo: 'E2', peligro: 'Contactos térmicos por frío', riesgo: 'Daño por contacto con superficies frías', consecuencia: 'Congelamiento, hipotermia', probabilidad: 1, severidad: 2, control: 'Ropa térmica' }
+            { codigo: 'A2', peligro: 'Caídas de altura (>1,8m)', riesgo: 'Caída a plano inferior desde altura mayor a 1.8m', consecuencia: 'Fracturas múltiples, incapacidad permanente', probabilidad: 2, severidad: 4, control: 'Arnés, línea de vida, barandas', cargoEvaluado: 'Albañil, Capataz', personasExpuestas: 8 },
+            { codigo: 'A3', peligro: 'Caídas al agua', riesgo: 'Caída a curso de agua o estructura con agua', consecuencia: 'Ahogamiento, hipotermia', probabilidad: 1, severidad: 4, control: 'Barandas, chalecos salvavidas', cargoEvaluado: 'Ayudante de obra', personasExpuestas: 3 },
+            { codigo: 'A4', peligro: 'Atrapamiento mecánico', riesgo: 'Atrapamiento por mecanismos de máquinas', consecuencia: 'Amputaciones, fracturas', probabilidad: 2, severidad: 4, control: 'Guardas, protecciones', cargoEvaluado: 'Maquinista, Operador', personasExpuestas: 5 },
+            { codigo: 'B1', peligro: 'Caída de objetos', riesgo: 'Golpe por elementos que caen desde altura', consecuencia: 'Traumatismos craneoencefálicos', probabilidad: 2, severidad: 4, control: 'Casco de seguridad, delimitación', cargoEvaluado: 'Todos los trabajadores', personasExpuestas: 35 },
+            { codigo: 'B2', peligro: 'Cortes / Punzantes', riesgo: 'Contacto con objetos cortantes o punzantes', consecuencia: 'Cortes, desgarros', probabilidad: 4, severidad: 2, control: 'Guantes, botas con puntera', cargoEvaluado: 'Albañil, Carpintero', personasExpuestas: 12 },
+            { codigo: 'B3', peligro: 'Choque contra objetos', riesgo: 'Impacto con objetos fijos o en movimiento', consecuencia: 'Contusiones, hematomas', probabilidad: 2, severidad: 2, control: 'Señalética, delimitación', cargoEvaluado: 'Ayudante de obra', personasExpuestas: 10 },
+            { codigo: 'C1', peligro: 'Contacto animales/insectos', riesgo: 'Lesiones por mordiscos, picaduras', consecuencia: 'Envenenamiento, infecciones', probabilidad: 1, severidad: 2, control: 'EPP, procedimientos', cargoEvaluado: 'Trabajadores de terreno', personasExpuestas: 20 },
+            { codigo: 'E1', peligro: 'Contactos térmicos por calor', riesgo: 'Quemaduras por superficies calientes', consecuencia: 'Quemaduras de I y II grado', probabilidad: 2, severidad: 2, control: 'Guantes térmicos, señalización', cargoEvaluado: 'Soldador, Herrero', personasExpuestas: 4 },
+            { codigo: 'E2', peligro: 'Contactos térmicos por frío', riesgo: 'Daño por contacto con superficies frías', consecuencia: 'Congelamiento, hipotermia', probabilidad: 1, severidad: 2, control: 'Ropa térmica', cargoEvaluado: 'Bodeguero, Jefe de bodega', personasExpuestas: 2 }
         ];
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -514,6 +528,8 @@
                     <td style="text-align: center;">${r.severidad}</td>
                     <td style="text-align: center; font-weight: 700;">${vep}</td>
                     <td><span class="risk-badge ${badgeClass}">${nivel.toUpperCase()}</span></td>
+                    <td>${r.cargoEvaluado || '-'}</td>
+                    <td style="text-align: center;">${r.personasExpuestas || '-'}</td>
                     <td>${r.control ? r.control.substring(0, 25) + '...' : '-'}</td>
                     <td onclick="event.stopPropagation()">
                         <div class="action-btns">
@@ -583,6 +599,8 @@
             const correctiva = document.getElementById('r-correctiva').value.trim();
             const responsable = document.getElementById('r-responsable').value.trim();
             const plazo = document.getElementById('r-plazo').value;
+            const cargoEvaluado = document.getElementById('r-cargo').value.trim();
+            const personasExpuestas = parseInt(document.getElementById('r-expuestos').value) || 0;
 
             if (!peligro || !riesgo) { showToast('Campo obligatorio faltante', 'error'); return; }
 
@@ -591,7 +609,7 @@
 
             let risks = getRisks();
             const newId = 'r-' + String(risks.length + 1).padStart(3, '0');
-            risks.push({ id: newId, codigo: 'NEW' + String(risks.length + 1).padStart(2,'0'), peligro, riesgo, consecuencia, probabilidad: prob, severidad: cons, nivel, control, correctiva, responsable, plazo });
+            risks.push({ id: newId, codigo: 'NEW' + String(risks.length + 1).padStart(2,'0'), peligro, riesgo, consecuencia, probabilidad: prob, severidad: cons, nivel, control, correctiva, responsable, plazo, cargoEvaluado, personasExpuestas });
 
             saveRisksList(risks);
             showToast('Registro IPER creado');
@@ -614,6 +632,8 @@
                 <div class="detail-row"><div class="detail-label">Peligro (Fuente)</div><div class="detail-value"><strong>${r.peligro}</strong></div></div>
                 <div class="detail-row"><div class="detail-label">Riesgo</div><div class="detail-value">${r.riesgo}</div></div>
                 <div class="detail-row"><div class="detail-label">Consecuencia</div><div class="detail-value">${r.consecuencia || '-'}</div></div>
+                <div class="detail-row"><div class="detail-label">Cargo/Cargos Evaluado</div><div class="detail-value">${r.cargoEvaluado || '-'}</div></div>
+                <div class="detail-row"><div class="detail-label">Personas Ex</div><div class="detail-value">${r.personasExpuestas || '-'}</div></div>
                 <div class="detail-row"><div class="detail-label">Probabilidad × Severidad</div><div class="detail-value">${r.probabilidad} × ${r.severidad}</div></div>
                 <div class="detail-row"><div class="detail-label">VEP</div><div class="detail-value" style="font-size: 1.5rem; font-weight: 700;">${vep} / 16</div></div>
                 <div class="detail-row"><div class="detail-label">Nivel</div><div class="detail-value"><span class="risk-badge risk-${ESCALA_IPER.calcularNivel(vep)}">${ESCALA_IPER.calcularNivel(vep).toUpperCase()}</span></div></div>
@@ -654,6 +674,11 @@ Probabilidad: ${r.probabilidad}
 Severidad: ${r.severidad}
 VEP (Valor Evaluación Peligro): ${vep} / 16
 Nivel de Riesgo: ${nivel.toUpperCase()}
+
+ALCANCE DE EXPOSICIÓN
+--------------------
+Cargo/Cargos Evaluados: ${r.cargoEvaluado || 'No especificado'}
+Cantidad de Personas Expuestas: ${r.personasExpuestas || 'No especificada'}
 
 CONTROL Y ACCIONES
 ------------------
@@ -719,7 +744,7 @@ Metodología: Guía ISP Chile GTI/IPER/001
             doc.text(`Base Legal: DS 44/2024, Ley 16.744`, 200, 57);
             
             // Tabla de datos
-            const headers = [['Cód', 'Peligro (Fuente)', 'Riesgo', 'Cons', 'Prob', 'Sev', 'VEP', 'Nivel', 'Control Preventivo']];
+            const headers = [['Cód', 'Peligro (Fuente)', 'Riesgo', 'Cons', 'Prob', 'Sev', 'VEP', 'Nivel', 'Cargo Evaluado', 'Exp.', 'Control Preventivo']];
             const body = risks.map(r => {
                 const vep = r.probabilidad * r.severidad;
                 const nivel = ESCALA_IPER.calcularNivel(vep);
@@ -732,6 +757,8 @@ Metodología: Guía ISP Chile GTI/IPER/001
                     r.severidad.toString(),
                     vep.toString(),
                     nivel.toUpperCase(),
+                    r.cargoEvaluado || '-',
+                    r.personasExpuestas ? r.personasExpuestas.toString() : '-',
                     r.control || '-'
                 ];
             });
@@ -752,15 +779,17 @@ Metodología: Guía ISP Chile GTI/IPER/001
                     fontStyle: 'bold'
                 },
                 columnStyles: {
-                    0: { cellWidth: 15 },  // Cód
-                    1: { cellWidth: 45 },  // Peligro
-                    2: { cellWidth: 45 },  // Riesgo
-                    3: { cellWidth: 35 },  // Cons
-                    4: { cellWidth: 12 },  // Prob
-                    5: { cellWidth: 12 },  // Sev
-                    6: { cellWidth: 12 },  // VEP
-                    7: { cellWidth: 20 },  // Nivel
-                    8: { cellWidth: 'auto' } // Control
+                    0: { cellWidth: 12 },   // Cód
+                    1: { cellWidth: 35 },   // Peligro
+                    2: { cellWidth: 35 },   // Riesgo
+                    3: { cellWidth: 25 },   // Cons
+                    4: { cellWidth: 10 },   // Prob
+                    5: { cellWidth: 10 },   // Sev
+                    6: { cellWidth: 10 },   // VEP
+                    7: { cellWidth: 15 },   // Nivel
+                    8: { cellWidth: 25 },   // Cargo Evaluado
+                    9: { cellWidth: 10 },   // Exp.
+                    10: { cellWidth: 'auto' } // Control
                 },
                 didParseCell: function(data) {
                     if (data.section === 'body') {
