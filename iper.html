@@ -618,8 +618,65 @@
                 <div class="detail-row"><div class="detail-label">Control</div><div class="detail-value">${r.control || '-'}</div></div>
                 <div class="detail-row"><div class="detail-label">Acción Correctiva</div><div class="detail-value">${r.correctiva || '-'}</div></div>
                 <div class="detail-row"><div class="detail-label">Responsable</div><div class="detail-value">${r.responsable || '-'}</div></div>
+                <div style="margin-top: 20px; text-align: center;">
+                    <button class="btn-primary-sm" onclick="descargarFicha('${r.id}')" style="background: var(--color-highlight);">📥 Descargar Ficha IPER</button>
+                </div>
             `;
             document.getElementById('modal-view').classList.add('active');
+        }
+
+        function descargarFicha(id) {
+            const r = getRisks().find(x => x.id === id);
+            if (!r) return;
+            
+            const vep = r.probabilidad * r.severidad;
+            const nivel = ESCALA_IPER.calcularNivel(vep);
+            const fecha = new Date().toLocaleDateString('es-CL');
+            
+            const contenido = `
+FICHA IPER - GESSTIA
+============================
+Fecha: ${fecha}
+Empresa: Constructora Los Andes Ltda.
+
+DATOS DEL PELIGRO/RIESGO
+--------------------------
+Código ISP: ${r.codigo}
+Peligro (Fuente): ${r.peligro}
+Riesgo: ${r.riesgo}
+Consecuencia: ${r.consecuencia || 'No especificada'}
+
+EVALUACIÓN
+----------
+Probabilidad: ${r.probabilidad}
+Severidad: ${r.severidad}
+VEP (Valor Evaluación Peligro): ${vep} / 16
+Nivel de Riesgo: ${nivel.toUpperCase()}
+
+CONTROL Y ACCIONES
+------------------
+Control Preventivo: ${r.control || 'No especificado'}
+Acción Correctiva: ${r.correctiva || 'No especificada'}
+Responsable: ${r.responsable || 'No asignado'}
+Plazo: ${r.plazo || 'No definido'}
+
+============================
+GeSSTia - Sistema de Gestión SST Chile 2026
+Base Legal: DS 44/2024, Ley 16.744
+Metodología: Guía ISP Chile GTI/IPER/001
+            `.trim();
+
+            const blob = new Blob([contenido], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Ficha_IPER_${r.codigo}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showToast('Ficha descargada correctamente');
         }
 
         function deleteRisk(id) {
