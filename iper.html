@@ -164,6 +164,8 @@
             font-size: 0.75rem;
         }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.14/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body class="dashboard-layout">
 
@@ -293,7 +295,7 @@
             <!-- Quick Actions -->
             <div class="quick-actions">
                 <button class="btn-primary-sm" onclick="openModal()">➕ Nuevo Peligro/Riesgo</button>
-                <button class="btn-action" onclick="exportIPER()">📄 Exportar Ficha</button>
+                <button class="btn-action" onclick="descargarMatrizPDF()">📄 Descargar Matriz IPER (PDF)</button>
             </div>
 
             <!-- Toolbar -->
@@ -688,8 +690,108 @@ Metodología: Guía ISP Chile GTI/IPER/001
             updateStats();
         }
 
-        function exportIPER() {
-            showToast('Exportando ficha IPER...');
+        function descargarMatrizPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('l', 'mm', 'a4'); // Landscape
+            const risks = getRisks();
+            const fecha = new Date().toLocaleDateString('es-CL');
+            
+            // Configurar fuentes
+            doc.setFont('helvetica');
+            
+            // Encabezado
+            doc.setFillColor(26, 26, 46); // Dark blue
+            doc.rect(0, 0, 298, 40, 'F');
+            
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(18);
+            doc.text('MATRIZ IPER - INFORME DE IDENTIFICACIÓN Y EVALUACIÓN DE RIESGOS', 149, 20, { align: 'center' });
+            doc.setFontSize(10);
+            doc.text('GeSSTia - Gestión Integral de SST Chile 2026', 149, 30, { align: 'center' });
+            
+            // Información de la empresa
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(11);
+            doc.text(`Empresa: Constructora Los Andes Ltda.`, 14, 50);
+            doc.text(`Fecha: ${fecha}`, 14, 57);
+            doc.text(`Responsable: Jefe SST`, 14, 64);
+            doc.text(`Metodología: Guía ISP Chile GTI/IPER/001`, 200, 50);
+            doc.text(`Base Legal: DS 44/2024, Ley 16.744`, 200, 57);
+            
+            // Tabla de datos
+            const headers = [['Cód', 'Peligro (Fuente)', 'Riesgo', 'Cons', 'Prob', 'Sev', 'VEP', 'Nivel', 'Control Preventivo']];
+            const body = risks.map(r => {
+                const vep = r.probabilidad * r.severidad;
+                const nivel = ESCALA_IPER.calcularNivel(vep);
+                return [
+                    r.codigo,
+                    r.peligro,
+                    r.riesgo,
+                    r.consecuencia || '-',
+                    r.probabilidad.toString(),
+                    r.severidad.toString(),
+                    vep.toString(),
+                    nivel.toUpperCase(),
+                    r.control || '-'
+                ];
+            });
+            
+            doc.autoTable({
+                startY: 70,
+                head: headers,
+                body: body,
+                styles: {
+                    fontSize: 8,
+                    cellPadding: 3,
+                    valign: 'middle',
+                    overflow: 'linebreak'
+                },
+                headStyles: {
+                    fillColor: [52, 152, 219],
+                    textColor: [255, 255, 255],
+                    fontStyle: 'bold'
+                },
+                columnStyles: {
+                    0: { cellWidth: 15 },  // Cód
+                    1: { cellWidth: 45 },  // Peligro
+                    2: { cellWidth: 45 },  // Riesgo
+                    3: { cellWidth: 35 },  // Cons
+                    4: { cellWidth: 12 },  // Prob
+                    5: { cellWidth: 12 },  // Sev
+                    6: { cellWidth: 12 },  // VEP
+                    7: { cellWidth: 20 },  // Nivel
+                    8: { cellWidth: 'auto' } // Control
+                },
+                didParseCell: function(data) {
+                    if (data.section === 'body') {
+                        const vep = parseInt(data.row.cells[6].text);
+                        if (!isNaN(vep)) {
+                            const nivel = ESCALA_IPER.calcularNivel(vep);
+                            const colors = {
+                                'tolerable': [46, 204, 113],
+                                'bajo': [241, 196, 15],
+                                'importante': [230, 126, 34],
+                                'critico': [231, 76, 60]
+                            };
+                            if (data.column.index === 7) {
+                                data.cell.styles.fillColor = colors[nivel];
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Pie de página
+            const pageCount = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.setFontSize(8);
+                doc.setTextColor(128, 128, 128);
+                doc.text(`Página ${i} de ${pageCount} - GeSSTia © 2026`, 149, 290, { align: 'center' });
+            }
+            
+            doc.save('Matriz_IPER_Constructora_Los_Andes.pdf');
+            showToast('Matriz PDF descargada correctamente');
         }
 
         function showToast(message, type = 'success') {
